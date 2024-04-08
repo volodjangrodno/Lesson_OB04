@@ -89,9 +89,9 @@ class Fighter:
     def changeWeapon(self, weapon: Weapon):
         self.weapon = weapon
         if self.weapon == 'sword':
-            print(f"{fighter.name} разит мечом.")
+            return weapon
         elif self.weapon == 'bow':
-            print(f"{fighter.name} стреляет из лука.")
+            return weapon
         print(f"{fighter.name} выбирает {weapon.name}.")
 
     def fight(self, monster):
