@@ -50,7 +50,7 @@ from abc import ABC, abstractmethod
 
 class Weapon(ABC):
     @abstractmethod
-    def attack(self):
+    def attack(self, monster):
         pass
 
 
@@ -59,13 +59,21 @@ class Weapon(ABC):
 
 
 class Sword(Weapon):
-    def attack(self):
-        return "Боец наносит удар мечом."
+    def __init__(self, weapon_type, name):
+        self.weapon_type = weapon_type
+        self.name = name
+    def attack(self, monster):
+        monster.take_damage(weapon_type='sword')
+
 
 
 class Bow(Weapon):
-    def attack(self):
-        return "Боец стреляет из лука."
+    def __init__(self, weapon_type, name):
+        self.weapon_type = weapon_type
+        self.name = name
+    def attack(self, monster):
+        monster.take_damage(weapon_type='bow')
+
 
 
 
@@ -73,43 +81,93 @@ class Bow(Weapon):
 
 
 class Fighter:
-    def __init__(self, weapon: Weapon):
+    def __init__(self, name, weapon: Weapon):
+        self.name = name
         self.weapon = weapon
 
-    def changeWeapon(self, new_weapon: Weapon):
-        self.weapon = new_weapon
 
-    def fight(self):
-        return self.weapon.attack()
+    def changeWeapon(self, weapon: Weapon):
+        self.weapon = weapon
+        if self.weapon == 'sword':
+            print(f"{fighter.name} разит мечом.")
+        elif self.weapon == 'bow':
+            print(f"{fighter.name} стреляет из лука.")
+        print(f"{fighter.name} выбирает {weapon.name}.")
+
+    def fight(self, monster):
+        print(self.weapon.attack(monster))
 
 
 ### Шаг 4: Реализация механизма боя
 
 
 class Monster:
-    def is_defeated(self):
-        return True
+    def __init__(self, name, power):
+        self.name = name
+        self.power = power
+        self.life_percentage = 100
+        # Счётчики для подсчёта ударов
+        self.damage_counts = {'sword': 0, 'bow': 0}
+
+    def take_damage(self, weapon_type):
 
 
-def battle(fighter, monster):
-    attack_result = fighter.fight()
-    print(attack_result)
-    if monster.is_defeated():
-        print("Монстр побежден!\n")
-    else:
-        print("Монстр выстоял!\n")
+        if weapon_type == 'sword':
+            action = "удар мечом"
+            self.damage_counts['sword'] += 1
+            if self.damage_counts['sword'] <= 3:
+                self.life_percentage -= 33.33
+
+        elif weapon_type == 'bow':
+            action = "выстрел из лука"
+            self.damage_counts['bow'] += 1
+            if self.damage_counts['bow'] <= 2:
+                self.life_percentage -= 50
+
+        print(f"{fighter.name} наносит {action}")
+
+        self.life_percentage = max(0, round(self.life_percentage, 0))
+
+        print(f"Остаток жизни монстра: {self.life_percentage}%")
+
+        # Выводим количество ударов мечом и выстрелов из лука
+
+        print(f"Ударов мечом: {self.damage_counts['sword']}; Выстрелов из лука: {self.damage_counts['bow']}")
+
+        if self.life_percentage <= 0:
+
+            print("Монстр побежден!")
 
 
-### Демонстрация работы программы
+    def reset(self):
+
+        self.damage_counts = {'sword': 0, 'bow': 0}
+        self.life_percentage = 100
+        print("Результаты схватки обнулены, монстр готов к новому бою!")
 
 
-if __name__ == '__main__':
-    monster = Monster()
 
-    # Боец изначально выбрал меч
-    fighter = Fighter(Sword())
-    battle(fighter, monster)
 
-    # Боец решает сменить оружие на лук
-    fighter.changeWeapon(Bow())
-    battle(fighter, monster)
+# Создаем бойца и монстра
+monster = Monster("Змей Горыныч", 100)
+fighter = Fighter("Илья Муромец", Sword("меч", "Меч-Кладинец"))
+
+# Обнуляем счетчики
+monster.reset()
+
+
+# Выбираем оружие
+weapon1 = Sword("меч", "Меч-Кладинец")
+weapon2 = Bow("лук", "Лук-Самострел")
+
+# Играем
+fighter.fight(monster)
+
+# Меняем оружие
+fighter.changeWeapon(weapon2)
+fighter.fight(monster)
+
+# Добиваем монстра
+fighter.changeWeapon(weapon1)
+fighter.fight(monster)
+
